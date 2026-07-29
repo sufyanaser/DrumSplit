@@ -28,7 +28,11 @@ class AudioInfo:
 
 def inspect_audio(path: Path) -> AudioInfo:
     info = sf.info(str(path))
-    return AudioInfo(frames=info.frames, sample_rate=info.samplerate, channels=info.channels)
+    return AudioInfo(
+        frames=info.frames,
+        sample_rate=info.samplerate,
+        channels=info.channels,
+    )
 
 
 def detect_device(requested: str) -> str:
@@ -49,7 +53,9 @@ def find_inputs(path: Path) -> list[Path]:
         return [path]
     if path.is_dir():
         files = sorted(
-            item for item in path.iterdir() if item.is_file() and item.suffix.lower() in SUPPORTED_EXTENSIONS
+            item
+            for item in path.iterdir()
+            if item.is_file() and item.suffix.lower() in SUPPORTED_EXTENSIONS
         )
         if not files:
             raise ValueError("Input directory contains no supported audio files.")
@@ -57,7 +63,12 @@ def find_inputs(path: Path) -> list[Path]:
     raise FileNotFoundError(f"Input does not exist: {path}")
 
 
-def run_demucs(input_file: Path, output_dir: Path, model_dir: Path, device: str) -> None:
+def run_demucs(
+    input_file: Path,
+    output_dir: Path,
+    model_dir: Path,
+    device: str,
+) -> None:
     command = [
         sys.executable,
         "-m",
@@ -72,7 +83,12 @@ def run_demucs(input_file: Path, output_dir: Path, model_dir: Path, device: str)
         device,
         str(input_file),
     ]
-    emit("separation_started", input=str(input_file), device=device, command=command[:-1])
+    emit(
+        "separation_started",
+        input=str(input_file),
+        device=device,
+        command=command[:-1],
+    )
     process = subprocess.Popen(
         command,
         stdout=subprocess.PIPE,
@@ -103,7 +119,9 @@ def locate_job_output(output_dir: Path, input_file: Path) -> Path:
     for match in matches:
         if match.is_dir():
             return match
-    raise FileNotFoundError(f"Could not locate separated output for {input_file.name}.")
+    raise FileNotFoundError(
+        f"Could not locate separated output for {input_file.name}."
+    )
 
 
 def normalize_stems(job_dir: Path, destination: Path) -> list[Path]:
@@ -119,7 +137,11 @@ def normalize_stems(job_dir: Path, destination: Path) -> list[Path]:
     return exported
 
 
-def validate_stems(source: Path, stems: list[Path], tolerance_seconds: float = 0.1) -> None:
+def validate_stems(
+    source: Path,
+    stems: list[Path],
+    tolerance_seconds: float = 0.1,
+) -> None:
     source_info = inspect_audio(source)
     for stem in stems:
         stem_info = inspect_audio(stem)
@@ -137,13 +159,25 @@ def validate_stems(source: Path, stems: list[Path], tolerance_seconds: float = 0
         )
 
 
-def separate(input_path: Path, output_dir: Path, model_dir: Path, requested_device: str) -> None:
+def separate(
+    input_path: Path,
+    output_dir: Path,
+    model_dir: Path,
+    requested_device: str,
+) -> None:
     if not model_dir.is_dir() or not any(model_dir.iterdir()):
-        raise FileNotFoundError("Model directory is missing or empty. Run drumsplit-setup first.")
+        raise FileNotFoundError(
+            "Model directory is missing or empty. Run drumsplit-setup first."
+        )
 
     inputs = find_inputs(input_path)
     device = detect_device(requested_device)
-    emit("environment", device=device, input_count=len(inputs), model_dir=str(model_dir))
+    emit(
+        "environment",
+        device=device,
+        input_count=len(inputs),
+        model_dir=str(model_dir),
+    )
 
     raw_dir = output_dir / ".raw"
     for index, input_file in enumerate(inputs, start=1):
@@ -153,7 +187,12 @@ def separate(input_path: Path, output_dir: Path, model_dir: Path, requested_devi
         final_dir = output_dir / input_file.stem
         stems = normalize_stems(job_dir, final_dir)
         validate_stems(input_file, stems)
-        emit("file_completed", input=str(input_file), output=str(final_dir), stems=[str(p) for p in stems])
+        emit(
+            "file_completed",
+            input=str(input_file),
+            output=str(final_dir),
+            stems=[str(path) for path in stems],
+        )
 
     shutil.rmtree(raw_dir, ignore_errors=True)
     emit("completed", output=str(output_dir), files=len(inputs))
