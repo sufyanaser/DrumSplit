@@ -30,7 +30,7 @@ try {
         --collect-all torchaudio `
         --collect-all soundfile `
         --hidden-import drumsplit.gui `
-        src\drumsplit\gui.py
+        run_gui.py
 
     if (-not (Test-Path 'dist\DrumSplit\DrumSplit.exe')) {
         throw 'Build completed without dist\DrumSplit\DrumSplit.exe.'
