@@ -13,7 +13,11 @@ MODEL_NAME = "49469ca8"
 
 
 def _existing_model_files(model_dir: Path) -> list[Path]:
-    return sorted(path for path in model_dir.iterdir() if path.is_file() and path.stat().st_size > 0)
+    return sorted(
+        path
+        for path in model_dir.iterdir()
+        if path.is_file() and path.stat().st_size > 0
+    )
 
 
 def download_model(model_dir: Path, force: bool = False) -> Path:
@@ -27,7 +31,11 @@ def download_model(model_dir: Path, force: bool = False) -> Path:
         for path in existing:
             path.unlink()
 
-    emit("model_download_started", file_id=MODEL_FILE_ID, output_dir=str(model_dir))
+    emit(
+        "model_download_started",
+        file_id=MODEL_FILE_ID,
+        output_dir=str(model_dir),
+    )
     result = gdown.download(
         id=MODEL_FILE_ID,
         output=str(model_dir) + os.sep,
@@ -40,12 +48,19 @@ def download_model(model_dir: Path, force: bool = False) -> Path:
     if not downloaded.exists() or downloaded.stat().st_size == 0:
         raise RuntimeError("Model download produced a missing or empty file.")
 
-    emit("model_ready", path=str(downloaded), cached=False, bytes=downloaded.stat().st_size)
+    emit(
+        "model_ready",
+        path=str(downloaded),
+        cached=False,
+        bytes=downloaded.stat().st_size,
+    )
     return downloaded
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Download the DrumSep model checkpoint.")
+    parser = argparse.ArgumentParser(
+        description="Download the DrumSep model checkpoint."
+    )
     parser.add_argument("--model-dir", type=Path, default=Path("model"))
     parser.add_argument("--force", action="store_true")
     return parser
