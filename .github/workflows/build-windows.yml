@@ -6,6 +6,7 @@ on:
     branches: [develop]
     paths:
       - "src/**"
+      - "run_gui.py"
       - "scripts/build_windows.ps1"
       - "pyproject.toml"
       - ".github/workflows/build-windows.yml"
@@ -45,7 +46,7 @@ jobs:
             --collect-all torchaudio `
             --collect-all soundfile `
             --hidden-import drumsplit.gui `
-            src/drumsplit/gui.py
+            run_gui.py
 
       - name: Verify EXE
         shell: pwsh
