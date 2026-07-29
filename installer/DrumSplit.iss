@@ -1,5 +1,5 @@
 #define MyAppName "DrumSplit"
-#define MyAppVersion "0.2.0"
+#define MyAppVersion "0.2.1"
 #define MyAppPublisher "Sufyan Nasser Ali"
 #define MyAppExeName "DrumSplit.exe"
 
@@ -12,7 +12,7 @@ DefaultDirName={autopf}\DrumSplit
 DefaultGroupName=DrumSplit
 DisableProgramGroupPage=yes
 OutputDir=..\dist\installer
-OutputBaseFilename=DrumSplit-Setup-0.2.0-x64
+OutputBaseFilename=DrumSplit-Setup-0.2.1-x64
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
