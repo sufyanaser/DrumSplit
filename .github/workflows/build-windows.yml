@@ -1,0 +1,67 @@
+name: Build Windows App
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [develop]
+    paths:
+      - "src/**"
+      - "run_gui.py"
+      - "scripts/build_windows.ps1"
+      - "pyproject.toml"
+      - ".github/workflows/build-windows.yml"
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install
+        run: python -m pip install -e ".[dev]"
+
+      - name: Lint
+        run: python -m ruff check .
+
+      - name: Tests
+        run: python -m pytest -q
+
+      - name: Build EXE
+        shell: pwsh
+        run: |
+          python -m PyInstaller `
+            --noconfirm `
+            --clean `
+            --windowed `
+            --onedir `
+            --name DrumSplit `
+            --collect-all demucs `
+            --collect-all torch `
+            --collect-all torchaudio `
+            --collect-all soundfile `
+            --hidden-import drumsplit.gui `
+            run_gui.py
+
+      - name: Verify EXE
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "dist/DrumSplit/DrumSplit.exe")) {
+            throw "DrumSplit.exe was not produced."
+          }
+
+      - name: Package
+        shell: pwsh
+        run: Compress-Archive -Path "dist/DrumSplit/*" -DestinationPath "dist/DrumSplit-Windows-x64.zip" -Force
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: DrumSplit-Windows-x64
+          path: dist/DrumSplit-Windows-x64.zip
+          if-no-files-found: error
+          retention-days: 14
