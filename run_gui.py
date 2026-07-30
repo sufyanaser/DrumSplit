@@ -1,3 +1,4 @@
+# ruff: noqa: E402, I001
 from __future__ import annotations
 
 import os
@@ -14,7 +15,7 @@ def _ensure_standard_streams() -> None:
 
 _ensure_standard_streams()
 
-from drumsplit.gui import main  # noqa: E402
+from drumsplit.gui import main
 
 
 if __name__ == "__main__":
