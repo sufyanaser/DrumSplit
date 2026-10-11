@@ -5,8 +5,17 @@ import sys
 from typing import Any, TextIO
 
 
-def emit(event: str, *, stream: TextIO = sys.stdout, **payload: Any) -> None:
-    """Write one machine-readable JSONL event and flush immediately."""
+def emit(event: str, *, stream: TextIO | None = None, **payload: Any) -> None:
+    """Write one machine-readable JSONL event when a text stream is available.
+
+    PyInstaller windowed applications set ``sys.stdout`` and ``sys.stderr`` to
+    ``None``. Resolving the stream at call time avoids capturing that invalid
+    value and lets the desktop UI run without a console.
+    """
+    target = stream if stream is not None else sys.stdout
+    if target is None:
+        return
+
     message = {"event": event, **payload}
-    stream.write(json.dumps(message, ensure_ascii=False) + "\n")
-    stream.flush()
+    target.write(json.dumps(message, ensure_ascii=False) + "\n")
+    target.flush()
